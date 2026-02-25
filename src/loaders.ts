@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 
-const MAX_DIFF_CHARS = 4000;
+const MAX_DIFF_CHARS = 8000;
 
 export interface GitMessage {
   role: 'assistant';
