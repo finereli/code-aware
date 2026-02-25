@@ -1,0 +1,27 @@
+{
+  "name": "code-aware",
+  "version": "0.2.0",
+  "description": "Give your coding agent architectural memory. Install, scan, and your agent gets better over time.",
+  "type": "module",
+  "bin": {
+    "code-aware": "./dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "scan": "tsx src/index.ts scan",
+    "sync": "tsx src/index.ts sync",
+    "status": "tsx src/index.ts status"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "commander": "^12.0.0",
+    "openai": "^4.80.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}
