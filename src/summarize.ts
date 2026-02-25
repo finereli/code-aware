@@ -62,7 +62,7 @@ Every observation should be assigned. If nothing fits, create a specific new mod
 
         if (!model) {
           const result = sqlite
-            .prepare('INSERT INTO models (name, is_base, content_dirty) VALUES (?, 0, 1)')
+            .prepare('INSERT INTO models (name, content_dirty) VALUES (?, 1)')
             .run(modelName);
           model = { id: Number(result.lastInsertRowid) };
         }

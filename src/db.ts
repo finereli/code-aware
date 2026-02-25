@@ -1,16 +1,8 @@
 import Database from 'better-sqlite3';
 
-// Base models for code awareness — seed categories that most codebases have
-export const BASE_MODELS: Record<string, string> = {
-  architecture: 'High-level system design — how major components connect, data flow, and key design decisions',
-  server: 'Backend — API routes, middleware, request handling, streaming, server-side state',
-  client: 'Frontend — UI components, state management, rendering patterns, user interactions',
-  database: 'Data layer — schema design, migrations, ORM usage, storage patterns',
-  deployment: 'Infrastructure — build process, hosting, service management, CI/CD',
-};
-
 /**
- * Initialize database with schema and seed base models.
+ * Initialize database with schema. No base models seeded —
+ * models are discovered dynamically from the codebase.
  */
 export function initDb(dbPath: string): void {
   const sqlite = new Database(dbPath);
@@ -22,7 +14,6 @@ export function initDb(dbPath: string): void {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL UNIQUE,
       description TEXT,
-      is_base INTEGER DEFAULT 0,
       synthesized_content TEXT,
       content_dirty INTEGER DEFAULT 1
     );
@@ -51,14 +42,6 @@ export function initDb(dbPath: string): void {
       source_id INTEGER NOT NULL
     );
   `);
-
-  // Seed base models
-  const insertModel = sqlite.prepare(
-    'INSERT OR IGNORE INTO models (name, description, is_base, content_dirty) VALUES (?, ?, 1, 1)'
-  );
-  for (const [name, description] of Object.entries(BASE_MODELS)) {
-    insertModel.run(name, description);
-  }
 
   sqlite.close();
 }

@@ -9,6 +9,7 @@ import { runTier0Summarization, runHigherTierSummarization } from './summarize.j
 import { synthesizeDirtyModels } from './pyramid.js';
 import { exportModels } from './generate.js';
 import { generateInsights } from './insights.js';
+import { discoverModels, consolidateModels } from './discover.js';
 
 type ProgressFn = (msg: string) => void;
 
@@ -97,10 +98,20 @@ export async function scan(
 
   onProgress?.(`Extracted ${totalObs} observations`);
 
+  // Discover models from observations (only on first scan when no models exist)
+  await discoverModels(sqlite, onProgress);
+
   const tier0 = await runTier0Summarization(sqlite, onProgress, parallel);
   const higher = await runHigherTierSummarization(sqlite, onProgress, parallel);
   if (tier0 || higher) {
     onProgress?.(`Created ${tier0} tier-0 + ${higher} higher-tier summaries`);
+  }
+
+  // Consolidate models (merge overlapping, rename mismatches)
+  const consolidated = await consolidateModels(sqlite, onProgress);
+  if (consolidated > 0) {
+    onProgress?.('Re-processing after consolidation...');
+    await runTier0Summarization(sqlite, onProgress, parallel);
   }
 
   await synthesizeDirtyModels(sqlite, onProgress, parallel);
@@ -193,10 +204,23 @@ export async function sync(
 
   onProgress?.(`Extracted ${totalObs} observations`);
 
+  // Discover models if none exist yet (e.g. first sync after empty init)
+  await discoverModels(sqlite, onProgress);
+
   const tier0 = await runTier0Summarization(sqlite, onProgress, parallel);
   const higher = await runHigherTierSummarization(sqlite, onProgress, parallel);
   if (tier0 || higher) {
     onProgress?.(`Created ${tier0} tier-0 + ${higher} higher-tier summaries`);
+  }
+
+  // Consolidate if enough new observations warrant it
+  const totalObsInDb = (sqlite.prepare('SELECT COUNT(*) as c FROM observations').get() as { c: number }).c;
+  if (totalObs > 20 || totalObsInDb > 100) {
+    const consolidated = await consolidateModels(sqlite, onProgress);
+    if (consolidated > 0) {
+      onProgress?.('Re-processing after consolidation...');
+      await runTier0Summarization(sqlite, onProgress, parallel);
+    }
   }
 
   await synthesizeDirtyModels(sqlite, onProgress, parallel);
