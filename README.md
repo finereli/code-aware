@@ -8,20 +8,26 @@ Works with Claude Code, Codex, Copilot, Cursor, and any tool that supports the [
 
 ## Install
 
-### Claude Code (plugin)
+### Claude Code (marketplace)
+
+In Claude Code, run:
+
+```
+/plugin marketplace add finereli/code-aware
+/plugin install code-aware@finereli
+```
+
+That's it. The skill is now available across all your projects.
+
+### Claude Code (local)
+
+For development or if you prefer a local install:
 
 ```bash
 git clone https://github.com/finereli/code-aware.git ~/code-aware
 cd ~/code-aware && npm install
-```
-
-Then load as a plugin:
-
-```bash
 claude --plugin-dir ~/code-aware
 ```
-
-Or for persistent install, add the plugin directory to your Claude Code settings.
 
 ### Other agents (Codex, Copilot, Cursor)
 
