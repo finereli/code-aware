@@ -4,7 +4,7 @@ import { chatCompletion, getClient } from './llm.js';
 
 type ProgressFn = (msg: string) => void;
 
-const INSIGHTS_PROMPT = `You just read the complete architectural models of a codebase, extracted from its git history. Now answer these questions as a senior developer who has deeply studied this code:
+const INSIGHTS_PROMPT = `You just read the complete architectural models of a codebase, extracted from its git history. Answer these questions as a senior developer who has deeply studied this code.
 
 1. **What's the most surprising aspect of the code?** Something that defies expectations or reveals a non-obvious design choice.
 
@@ -18,7 +18,12 @@ const INSIGHTS_PROMPT = `You just read the complete architectural models of a co
 
 6. **What would you want to know before making your first change?** The single most important thing a new developer should understand.
 
-Write as yourself — opinionated, specific, grounded in what you actually read. Reference specific files, patterns, and decisions. Don't hedge or qualify everything. Be direct.`;
+Rules:
+- Be opinionated, specific, and grounded in what you actually read.
+- Reference specific files, patterns, and decisions.
+- Don't hedge or qualify everything. Be direct.
+- Start with the content immediately. No preamble like "Absolutely!", "Great question!", "Sure!", etc.
+- Write in a clean, understated tone. No exclamation marks in headers or topic sentences.`;
 
 /**
  * Generate insights from synthesized models.

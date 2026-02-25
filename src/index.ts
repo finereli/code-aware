@@ -15,12 +15,13 @@ program
   .command('scan')
   .description('First run: scan git history and generate architectural models')
   .option('-r, --repo <path>', 'Path to git repository', '.')
-  .option('-n, --limit <number>', 'Maximum commits to process', '500')
+  .option('-n, --limit <number>', 'Maximum commits to process (default: 50 for quick scan)', '50')
+  .option('--full', 'Scan full git history (no commit limit)')
   .option('-p, --parallel <number>', 'LLM parallel workers', '10')
   .action(async (opts) => {
     const repoPath = resolve(opts.repo);
     const workspace = join(repoPath, '.code-aware');
-    const limit = parseInt(opts.limit, 10);
+    const limit = opts.full ? 0 : parseInt(opts.limit, 10);
     const parallel = parseInt(opts.parallel, 10);
 
     try {

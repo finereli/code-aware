@@ -50,7 +50,7 @@ export async function scan(
     onProgress?: ProgressFn;
   } = {}
 ): Promise<string[]> {
-  const { limit = 500, parallel = 10, onProgress } = options;
+  const { limit = 50, parallel = 10, onProgress } = options;
   const absRepo = resolve(repoPath);
   const absWorkspace = resolve(workspace);
   const dbPath = join(absWorkspace, 'code-aware.db');
@@ -58,9 +58,11 @@ export async function scan(
   mkdirSync(absWorkspace, { recursive: true });
   initDb(dbPath);
 
-  onProgress?.(`Scanning ${absRepo} (last ${limit} commits)...`);
+  onProgress?.(limit > 0
+    ? `Scanning ${absRepo} (last ${limit} commits)...`
+    : `Scanning ${absRepo} (full history)...`);
 
-  const { messages, info } = loadGitCommits(absRepo, { limit });
+  const { messages, info } = loadGitCommits(absRepo, { limit: limit || undefined });
   onProgress?.(info);
 
   if (messages.length === 0) {

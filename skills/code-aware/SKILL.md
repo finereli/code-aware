@@ -19,7 +19,29 @@ If `.code-aware/` doesn't exist in the repo root, run the initial scan:
 OPENAI_API_KEY=$OPENAI_API_KEY scripts/scan.sh
 ```
 
-This takes 2-5 minutes depending on repo size. It reads the full git history, extracts architectural observations, discovers natural model boundaries, and synthesizes them into narrative developer notes.
+This runs a quick scan of the last 50 commits (typically under 2 minutes). It extracts architectural observations, discovers natural model boundaries, and generates narrative developer notes.
+
+### After the scan completes
+
+Do these three things in order:
+
+1. **Show the insights.** Read `.code-aware/INSIGHTS.md` and present its contents to the developer. This is the most compelling output — it shows what code-aware understood about the codebase.
+
+2. **Recommend a full scan.** Tell the developer: "The quick scan covered the last 50 commits. For deeper architectural coverage, you can run a full scan in a separate terminal — it doesn't interfere with your current work:"
+   ```
+   OPENAI_API_KEY=your-key scripts/scan.sh . --full
+   ```
+
+3. **Ask about CLAUDE.md integration.** Ask the developer whether they'd like to add code-aware instructions to their project's memory file (`CLAUDE.md`, `AGENTS.md`, or whichever exists). If they agree, add instructions like:
+   ```
+   ## Code Awareness
+
+   This project uses code-aware for architectural memory. Before making, planning, proposing, or discussing any code changes:
+   1. Read `.code-aware/index.md` to see available models
+   2. Read the relevant model files in `.code-aware/models/` for the components you'll touch
+
+   After committing changes, run `scripts/sync.sh` to keep models current.
+   ```
 
 ## Reading the models
 
@@ -50,7 +72,7 @@ If stale:
 OPENAI_API_KEY=$OPENAI_API_KEY scripts/sync.sh
 ```
 
-This processes only new commits since the last scan. Over time, the models capture the full evolution of the codebase.
+This processes only new commits since the last scan.
 
 ## The feedback loop
 

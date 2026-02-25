@@ -8,4 +8,6 @@ while [ -L "$SOURCE" ]; do
 done
 SCRIPT_DIR="$(cd "$(dirname "$SOURCE")" && pwd)"
 TOOL_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-exec npx --prefix "$TOOL_ROOT" tsx "$TOOL_ROOT/src/index.ts" scan --repo "${1:-.}"
+REPO="${1:-.}"
+shift 2>/dev/null || true
+exec npx --prefix "$TOOL_ROOT" tsx "$TOOL_ROOT/src/index.ts" scan --repo "$REPO" "$@"
