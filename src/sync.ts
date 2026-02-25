@@ -8,6 +8,7 @@ import { extractObservations } from './llm.js';
 import { runTier0Summarization, runHigherTierSummarization } from './summarize.js';
 import { synthesizeDirtyModels } from './pyramid.js';
 import { exportModels } from './generate.js';
+import { generateInsights } from './insights.js';
 
 type ProgressFn = (msg: string) => void;
 
@@ -121,6 +122,8 @@ export async function scan(
   if (written.length > 0) {
     onProgress?.(`Written: ${written.join(', ')}`);
   }
+
+  await generateInsights(absWorkspace, onProgress);
   onProgress?.('Scan complete.');
 
   return written;
@@ -211,6 +214,8 @@ export async function sync(
   if (written.length > 0) {
     onProgress?.(`Updated: ${written.join(', ')}`);
   }
+
+  await generateInsights(absWorkspace, onProgress);
   onProgress?.('Sync complete.');
 
   return written;
