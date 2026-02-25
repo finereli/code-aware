@@ -8,19 +8,30 @@ Works with Claude Code, Codex, Copilot, Cursor, and any tool that supports the [
 
 ## Install
 
+### Claude Code (plugin)
+
 ```bash
 git clone https://github.com/finereli/code-aware.git ~/code-aware
 cd ~/code-aware && npm install
 ```
 
-Then install the skill for your agent:
+Then load as a plugin:
 
-**Claude Code / Codex / Copilot / Cursor:**
 ```bash
+claude --plugin-dir ~/code-aware
+```
+
+Or for persistent install, add the plugin directory to your Claude Code settings.
+
+### Other agents (Codex, Copilot, Cursor)
+
+```bash
+git clone https://github.com/finereli/code-aware.git ~/code-aware
+cd ~/code-aware && npm install
 ln -s ~/code-aware/skills/code-aware ~/.claude/skills/code-aware
 ```
 
-Your agent will now discover code-aware automatically and use it when relevant.
+Your agent will discover code-aware automatically and use it when relevant.
 
 ## First Scan
 
@@ -31,7 +42,13 @@ cd /path/to/your/project
 OPENAI_API_KEY=sk-... ~/code-aware/skills/code-aware/scripts/scan.sh
 ```
 
-Takes 2-5 minutes depending on repo size. Output lands in `.code-aware/`:
+The default quick scan processes the last 50 commits (~2 minutes). For full history:
+
+```bash
+OPENAI_API_KEY=sk-... ~/code-aware/skills/code-aware/scripts/scan.sh . --full
+```
+
+Output lands in `.code-aware/`:
 - `index.md` — list of all models with descriptions
 - `models/*.md` — one file per architectural component
 - `INSIGHTS.md` — six opinionated questions about the codebase

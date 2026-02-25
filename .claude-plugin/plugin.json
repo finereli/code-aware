@@ -1,0 +1,13 @@
+{
+  "name": "code-aware",
+  "version": "0.2.0",
+  "description": "Give your coding agent architectural memory. Processes git history into developer-notes-style models.",
+  "author": {
+    "name": "Eli Finer",
+    "email": "eli.finer@gmail.com"
+  },
+  "homepage": "https://github.com/finereli/code-aware",
+  "repository": "https://github.com/finereli/code-aware",
+  "license": "MIT",
+  "keywords": ["code-awareness", "architectural-memory", "git-history", "developer-notes"]
+}
