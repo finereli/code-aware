@@ -4,26 +4,37 @@ Give your coding agent architectural memory.
 
 code-aware processes git history to build a mental model of your codebase — not just what exists, but why it was built that way and how it evolved. The output is a set of developer-notes-style markdown files that any coding agent can read before making changes.
 
-## Quick Start
+Works with Claude Code, Codex, Copilot, Cursor, and any tool that supports the [Agent Skills](https://agentskills.io) standard.
+
+## Install
 
 ```bash
-git clone https://github.com/finereli/code-aware.git
-cd code-aware
-npm install
+git clone https://github.com/finereli/code-aware.git ~/code-aware
+cd ~/code-aware && npm install
 ```
 
-Then scan any repo:
+Then install the skill for your agent:
+
+**Claude Code / Codex / Copilot / Cursor:**
+```bash
+ln -s ~/code-aware/skills/code-aware ~/.claude/skills/code-aware
+```
+
+Your agent will now discover code-aware automatically and use it when relevant.
+
+## First Scan
+
+In any project, ask your agent to scan the codebase, or run manually:
 
 ```bash
-OPENAI_API_KEY=sk-... npx tsx src/index.ts scan --repo /path/to/your/repo
+cd /path/to/your/project
+OPENAI_API_KEY=sk-... ~/code-aware/skills/code-aware/scripts/scan.sh
 ```
 
-This reads the full git history, extracts architectural observations, discovers natural model boundaries, synthesizes them into narrative developer notes, and generates codebase-level insights. Takes 2-5 minutes depending on repo size.
-
-Output lands in `/path/to/your/repo/.code-aware/`:
+Takes 2-5 minutes depending on repo size. Output lands in `.code-aware/`:
 - `index.md` — list of all models with descriptions
 - `models/*.md` — one file per architectural component
-- `INSIGHTS.md` — six opinionated questions about the codebase (most surprising aspect, most elegant part, messiest area, biggest recent pivot, design philosophy, what to know before your first change)
+- `INSIGHTS.md` — six opinionated questions about the codebase
 
 ## What It Produces
 
@@ -55,23 +66,19 @@ code-aware creates a virtuous cycle: the more context your agent has about the c
 
 ## Keeping Models Current
 
-After committing new work:
+After committing new work, sync to process only new commits:
 
 ```bash
-OPENAI_API_KEY=sk-... npx tsx src/index.ts sync --repo /path/to/your/repo
+OPENAI_API_KEY=sk-... ~/code-aware/skills/code-aware/scripts/sync.sh
 ```
-
-Only processes new commits since the last scan. Periodically re-consolidates models if enough new observations accumulate.
 
 Check staleness without updating:
 
 ```bash
-npx tsx src/index.ts status --repo /path/to/your/repo
+~/code-aware/skills/code-aware/scripts/status.sh
 ```
 
-## Using with Claude Code
-
-Drop `SKILL.md` into your project or reference it in your Claude Code configuration. It tells the agent how to read and maintain the models. See [SKILL.md](SKILL.md) for details.
+Or just ask your agent — the skill knows when to check and update.
 
 ## Configuration
 
