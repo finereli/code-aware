@@ -41,23 +41,25 @@ Your agent will discover code-aware automatically and use it when relevant.
 
 ## First Scan
 
-In any project, ask your agent to scan the codebase, or run manually:
+Ask your agent to scan the codebase — code-aware automatically uses whatever LLM is available in your environment (Haiku on Claude Code, GPT-4.1-mini on Codex).
+
+Or run manually:
 
 ```bash
 cd /path/to/your/project
-OPENAI_API_KEY=sk-... ~/code-aware/skills/code-aware/scripts/scan.sh
+~/code-aware/skills/code-aware/scripts/scan.sh
 ```
 
-The default quick scan processes the last 50 commits (~2 minutes). For full history:
+The default quick scan processes the **last 50 commits** (~2 minutes). For full history:
 
 ```bash
-OPENAI_API_KEY=sk-... ~/code-aware/skills/code-aware/scripts/scan.sh . --full
+~/code-aware/skills/code-aware/scripts/scan.sh . --full
 ```
 
 Output lands in `.code-aware/`:
 - `index.md` — list of all models with descriptions
 - `models/*.md` — one file per architectural component
-- `INSIGHTS.md` — six opinionated questions about the codebase
+- `INSIGHTS.md` — six opinionated observations about the codebase
 
 ## What It Produces
 
@@ -92,7 +94,7 @@ code-aware creates a virtuous cycle: the more context your agent has about the c
 After committing new work, sync to process only new commits:
 
 ```bash
-OPENAI_API_KEY=sk-... ~/code-aware/skills/code-aware/scripts/sync.sh
+~/code-aware/skills/code-aware/scripts/sync.sh
 ```
 
 Check staleness without updating:
@@ -105,11 +107,19 @@ Or just ask your agent — the skill knows when to check and update.
 
 ## Configuration
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENAI_API_KEY` | required | OpenAI API key |
-| `CODE_AWARE_MODEL` | `gpt-4.1-mini` | Model for observation extraction and synthesis |
-| `CODE_AWARE_INSIGHTS_MODEL` | `gpt-4.1` | Model for codebase insights (uses full model for quality) |
+code-aware auto-detects your LLM provider from environment variables:
+
+| Provider | Key | Default model | Default insights model |
+|----------|-----|---------------|----------------------|
+| OpenAI | `OPENAI_API_KEY` | gpt-4.1-mini | gpt-4.1 |
+| Anthropic | `ANTHROPIC_API_KEY` | claude-haiku-4 | claude-sonnet-4 |
+
+Override with:
+
+| Variable | Description |
+|----------|-------------|
+| `CODE_AWARE_MODEL` | Override the model for observation extraction and synthesis |
+| `CODE_AWARE_INSIGHTS_MODEL` | Override the model for codebase insights |
 
 ## How It Works
 

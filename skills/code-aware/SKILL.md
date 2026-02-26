@@ -16,7 +16,7 @@ Architectural memory for your codebase, built from git history.
 If `.code-aware/` doesn't exist in the repo root, run the initial scan:
 
 ```bash
-OPENAI_API_KEY=$OPENAI_API_KEY scripts/scan.sh
+scripts/scan.sh
 ```
 
 This runs a quick scan of the last 50 commits (typically under 2 minutes). It extracts architectural observations, discovers natural model boundaries, and generates narrative developer notes.
@@ -29,7 +29,7 @@ Do these three things in order:
 
 2. **Recommend a full scan.** Tell the developer: "The quick scan covered the last 50 commits. For deeper architectural coverage, you can run a full scan in a separate terminal — it doesn't interfere with your current work:"
    ```
-   OPENAI_API_KEY=your-key scripts/scan.sh . --full
+   scripts/scan.sh . --full
    ```
 
 3. **Ask about CLAUDE.md integration.** Ask the developer whether they'd like to add code-aware instructions to their project's memory file (`CLAUDE.md`, `AGENTS.md`, or whichever exists). If they agree, add instructions like:
@@ -69,7 +69,7 @@ scripts/status.sh
 If stale:
 
 ```bash
-OPENAI_API_KEY=$OPENAI_API_KEY scripts/sync.sh
+scripts/sync.sh
 ```
 
 This processes only new commits since the last scan.
@@ -88,6 +88,7 @@ Each model file contains developer notes organized by topic:
 
 ## Configuration
 
-- `OPENAI_API_KEY` — required, uses gpt-4.1-mini by default
+Auto-detects LLM provider from `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the environment.
+
 - `CODE_AWARE_MODEL` — override the LLM model for observation extraction and synthesis
-- `CODE_AWARE_INSIGHTS_MODEL` — override the model for codebase insights (defaults to gpt-4.1)
+- `CODE_AWARE_INSIGHTS_MODEL` — override the model for codebase insights
