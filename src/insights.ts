@@ -61,12 +61,13 @@ export async function generateInsights(
   const allModels = modelContents.join('\n\n---\n\n');
 
   // Use the stronger model for insights — this is the "wow" moment
+  const today = new Date().toISOString().slice(0, 10);
   const client = getClient();
   const response = await client.chat.completions.create({
     model: INSIGHTS_MODEL,
     messages: [
       { role: 'system', content: INSIGHTS_PROMPT },
-      { role: 'user', content: `Here are the architectural models:\n\n${allModels}` },
+      { role: 'user', content: `Today's date: ${today}\n\nHere are the architectural models:\n\n${allModels}` },
     ],
   });
   const insights = response.choices[0]?.message?.content?.trim() ?? '';
