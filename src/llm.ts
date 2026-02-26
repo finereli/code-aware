@@ -2,7 +2,49 @@ import OpenAI from 'openai';
 import { OBSERVE_SYSTEM_PROMPT, OBSERVE_USER_PREFIX, OBSERVE_TOOL } from './prompts.js';
 import type { GitMessage } from './loaders.js';
 
-export const MODEL = process.env.CODE_AWARE_MODEL || 'gpt-4.1-mini';
+/**
+ * Auto-detect LLM provider from available API keys.
+ * Priority: CODE_AWARE_MODEL env var > OPENAI_API_KEY > ANTHROPIC_API_KEY
+ */
+interface ProviderConfig {
+  apiKey: string;
+  baseURL?: string;
+  defaultModel: string;
+  defaultInsightsModel: string;
+  name: string;
+}
+
+function detectProvider(): ProviderConfig {
+  if (process.env.OPENAI_API_KEY) {
+    return {
+      apiKey: process.env.OPENAI_API_KEY,
+      defaultModel: 'gpt-4.1-mini',
+      defaultInsightsModel: 'gpt-4.1',
+      name: 'OpenAI',
+    };
+  }
+  if (process.env.ANTHROPIC_API_KEY) {
+    return {
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      baseURL: 'https://api.anthropic.com/v1/',
+      defaultModel: 'claude-haiku-4',
+      defaultInsightsModel: 'claude-sonnet-4-20250514',
+      name: 'Anthropic',
+    };
+  }
+  // Fall back to OpenAI SDK defaults (will error if no key is set)
+  return {
+    apiKey: '',
+    defaultModel: 'gpt-4.1-mini',
+    defaultInsightsModel: 'gpt-4.1',
+    name: 'OpenAI',
+  };
+}
+
+const provider = detectProvider();
+export const MODEL = process.env.CODE_AWARE_MODEL || provider.defaultModel;
+export const INSIGHTS_MODEL = process.env.CODE_AWARE_INSIGHTS_MODEL || provider.defaultInsightsModel;
+
 const MAX_TOKENS = 10000;
 const CHARS_PER_TOKEN = 4;
 
@@ -10,7 +52,17 @@ let _client: OpenAI | null = null;
 
 export function getClient(): OpenAI {
   if (!_client) {
-    _client = new OpenAI();
+    const opts: ConstructorParameters<typeof OpenAI>[0] = {
+      apiKey: provider.apiKey,
+    };
+    if (provider.baseURL) {
+      opts.baseURL = provider.baseURL;
+    }
+    _client = new OpenAI(opts);
+    // Log which provider we're using (visible in scan output)
+    if (provider.apiKey) {
+      console.log(`Using ${provider.name} (${MODEL})`);
+    }
   }
   return _client;
 }
@@ -54,11 +106,22 @@ async function processChunk(chunk: GitMessage[]): Promise<Observation[]> {
   const chunkTimestamp = chunk[chunk.length - 1]?.timestamp ?? null;
   const conversationText = chunk.map(m => `assistant: ${m.content}`).join('\n');
 
+  // Provide temporal context so the model doesn't assume commit dates are "current"
+  const today = new Date().toISOString().slice(0, 10);
+  const commitDates = chunk
+    .map(m => m.timestamp?.slice(0, 10))
+    .filter(Boolean) as string[];
+  const earliest = commitDates[0];
+  const latest = commitDates[commitDates.length - 1];
+  const dateContext = earliest
+    ? `Today's date: ${today}. These commits are from ${earliest} to ${latest}. Describe what was true at the time of these commits — do not label past dates as "current".\n\n`
+    : '';
+
   const response = await client.chat.completions.create({
     model: MODEL,
     messages: [
       { role: 'system', content: OBSERVE_SYSTEM_PROMPT },
-      { role: 'user', content: `${OBSERVE_USER_PREFIX}\n\n${conversationText}` },
+      { role: 'user', content: `${dateContext}${OBSERVE_USER_PREFIX}\n\n${conversationText}` },
     ],
     tools: [OBSERVE_TOOL],
     tool_choice: 'auto',

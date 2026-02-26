@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { chatCompletion, getClient } from './llm.js';
+import { chatCompletion, getClient, INSIGHTS_MODEL } from './llm.js';
 
 type ProgressFn = (msg: string) => void;
 
@@ -61,10 +61,9 @@ export async function generateInsights(
   const allModels = modelContents.join('\n\n---\n\n');
 
   // Use the stronger model for insights — this is the "wow" moment
-  const insightsModel = process.env.CODE_AWARE_INSIGHTS_MODEL || 'gpt-4.1';
   const client = getClient();
   const response = await client.chat.completions.create({
-    model: insightsModel,
+    model: INSIGHTS_MODEL,
     messages: [
       { role: 'system', content: INSIGHTS_PROMPT },
       { role: 'user', content: `Here are the architectural models:\n\n${allModels}` },
